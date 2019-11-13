@@ -6,15 +6,19 @@
   "scripts": {
     "sls": "serverless",
     "seed": "node ./seed/runner.js",
-    "start": "sls offline start"
+    "start": "sls offline start",
+    "deploy": "serverless deploy --aws-profile serverless",
+    "package": "serverless package"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "aws-sdk": "^2.571.0",
-    "dotenv": "^8.2.0",
     "jest": "^24.9.0",
     "serverless-offline": "^5.12.0"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0"
   }
 }

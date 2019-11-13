@@ -1,12 +1,15 @@
 class ContactRepository {
   get _baseParams() {
     return {
-      TableName: "contacts"
+      TableName: this._tableName
     };
   }
 
-  constructor(documentClient) {
+  constructor(documentClient, tableName) {
+    // update the contructor to accept a 'tableName' param
+    // so we're not tied to 'contacts' for all stages/deployments
     this._documentClient = documentClient;
+    this._tableName = tableName;
   }
 
   async list() {

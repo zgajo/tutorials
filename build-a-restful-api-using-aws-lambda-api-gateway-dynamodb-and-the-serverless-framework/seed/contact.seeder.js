@@ -1,20 +1,24 @@
 class ContactSeeder {
-  constructor(dynamodb, docClient) {
+  constructor(dynamodb, docClient, tableName) {
     this.dynamodb = dynamodb;
     this.docClient = docClient;
 
-    this._tablename = "contacts";
+    console.log("tableName", tableName);
+
+    this.tableName = tableName;
+
+    console.log("tableName", this.tableName);
   }
 
   async hasTable() {
     const tables = await this.dynamodb.listTables({ Limit: 5 }).promise();
 
-    return tables.TableNames && tables.TableNames.indexOf(this._tablename) >= 0;
+    return tables.TableNames && tables.TableNames.indexOf(this.tableName) >= 0;
   }
 
   async createTable() {
     const tableParams = {
-      TableName: this._tablename,
+      TableName: this.tableName,
       KeySchema: [
         // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
         {
@@ -44,7 +48,7 @@ class ContactSeeder {
 
   async deleteTable() {
     const result = await this.dynamodb
-      .deleteTable({ TableName: this._tablename })
+      .deleteTable({ TableName: this.tableName })
       .promise();
 
     return !!result.$response.err;
@@ -61,7 +65,7 @@ class ContactSeeder {
     // set the request items param with the put requests
     const params = {
       RequestItems: {
-        [this._tablename]: putRequests
+        [this.tableName]: putRequests
       }
     };
 
