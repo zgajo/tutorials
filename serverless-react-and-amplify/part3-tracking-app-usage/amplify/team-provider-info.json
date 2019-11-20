@@ -1,0 +1,19 @@
+{
+    "envone": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-react-amplify-envone-93708-authRole",
+            "UnauthRoleArn": "arn:aws:iam::456582705970:role/amplify-react-amplify-envone-93708-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::456582705970:role/amplify-react-amplify-envone-93708-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-react-amplify-envone-93708-deployment",
+            "UnauthRoleName": "amplify-react-amplify-envone-93708-unauthRole",
+            "StackName": "amplify-react-amplify-envone-93708",
+            "StackId": "arn:aws:cloudformation:us-east-1:456582705970:stack/amplify-react-amplify-envone-93708/c6be5500-0aa7-11ea-9848-0aece6d977c1"
+        },
+        "categories": {
+            "auth": {
+                "cognitob70192e3": {}
+            }
+        }
+    }
+}
