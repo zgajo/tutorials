@@ -1,0 +1,20 @@
+{
+  "name": "designing-graphQL-schemas-NikGraf",
+  "version": "1.0.0",
+  "description": "https://www.youtube.com/watch?v=fBkmlFfwRu0&list=WL&index=39&t=8s",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.9.12",
+    "graphql": "^14.5.8"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.1"
+  }
+}
