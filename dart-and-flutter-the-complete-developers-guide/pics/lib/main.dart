@@ -7,7 +7,17 @@ void main() {
   //  creates materialapp widget
   var app = MaterialApp(
     // default route
-    home: Text('Hi there'),
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text('Pics'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('de si ba');
+        },
+        child: Icon(Icons.add),
+      ),
+    ),
   );
 
 // runApp is imported with material
