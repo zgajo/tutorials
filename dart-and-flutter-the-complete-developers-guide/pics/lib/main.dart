@@ -2,23 +2,12 @@
 // flutter - the name of the package we are importing
 // /material.dart - the file we are importing from that package
 import 'package:flutter/material.dart';
+// imports App widget
+import './src/app.dart';
 
 void main() {
   //  creates materialapp widget
-  var app = MaterialApp(
-    // default route
-    home: Scaffold(
-      appBar: AppBar(
-        title: Text('Pics'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('de si ba');
-        },
-        child: Icon(Icons.add),
-      ),
-    ),
-  );
+  var app = App();
 
 // runApp is imported with material
   runApp(app);
