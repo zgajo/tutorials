@@ -4,6 +4,9 @@ services:
     build: "./listings-service"
     depends_on:
       - listings-service-db
+    environment:
+      - TYPEORM_USERNAME=root
+      - TYPEORM_PASSWORD=password
     volumes: # if we make some change, thanks to volumes change will be changed in container immediately
       - ./listings-service:/opt/app
 
@@ -19,6 +22,9 @@ services:
     build: "./users-service"
     depends_on:
       - users-service-db
+    environment:
+      - TYPEORM_USERNAME=root
+      - TYPEORM_PASSWORD=password
     volumes:
       - ./users-service:/opt/app
 
