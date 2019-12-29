@@ -1,9 +1,11 @@
 require("dotenv/config");
 
+const { CONTACTS_TABLE } = process.env;
+
 const { ContactSeeder } = require("./contact.seeder");
 const { DynamoDB } = require("aws-sdk");
 const { DocumentClient } = DynamoDB;
-const contactsData = require("./contacts-test-data.json.js");
+const contactsData = require("./contacts-test-data.json");
 
 const dynamo = new DynamoDB({
   endpoint: process.env.AWS_ENDPOINT,
@@ -13,13 +15,14 @@ const dynamo = new DynamoDB({
 });
 
 const doclient = new DocumentClient({ service: dynamo });
-const contactSeeder = new ContactSeeder(dynamo, doclient);
+const contactSeeder = new ContactSeeder(dynamo, doclient, CONTACTS_TABLE);
 
 const log = (...mgs) => console.log(">>", ...mgs);
 
 const seedContacts = async () => {
   log(`Checking if 'contacts' table exists`);
 
+  console.log("contactSeeder.tableName", contactSeeder.tableName);
   const exists = await contactSeeder.hasTable();
 
   if (exists) {
