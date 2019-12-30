@@ -1,6 +1,6 @@
 module.exports = {
   type: "mysql",
-  host: "localhost",
+  host: "listings-service-db",
   port: 3306,
   username: process.env.TYPEORM_USERNAME,
   password: process.env.TYPEORM_PASSWORD,
