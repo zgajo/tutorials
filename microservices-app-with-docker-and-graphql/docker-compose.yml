@@ -1,5 +1,16 @@
 version: "3"
 services:
+  api-gateway:
+    build: "./api-gateway"
+    depends_on:
+      - listings-service
+      - users-service
+
+    ports:
+      - 7000:7000
+    volumes: # if we make some change, thanks to volumes change will be changed in container immediately
+      - ./api-gateway:/opt/app
+
   listings-service:
     build: "./listings-service"
     depends_on:
