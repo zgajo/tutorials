@@ -1,1 +1,3 @@
-console.log("work in listings");
+import "reflect-metadata";
+
+import "./server/startServer";
