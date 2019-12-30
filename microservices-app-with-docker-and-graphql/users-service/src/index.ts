@@ -1,1 +1,3 @@
-console.log("work in users");
+import "reflect-metadata";
+
+import "./server/startServer";
