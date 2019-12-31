@@ -3,12 +3,13 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToOne,
-  JoinColumn
+  JoinColumn,
+  BaseEntity
 } from "typeorm";
 import { User } from "./users";
 
 @Entity()
-export class UserSessions {
+export class UserSessions extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
