@@ -10,8 +10,7 @@ export class User extends BaseEntity {
 
   @Column("char", {
     nullable: false,
-    length: 64,
-    select: false
+    length: 64
   })
   passwordHash: string;
 }

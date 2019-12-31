@@ -1,10 +1,10 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  Column,
   OneToOne,
   JoinColumn,
-  BaseEntity
+  BaseEntity,
+  CreateDateColumn
 } from "typeorm";
 import { User } from "./users";
 
@@ -17,9 +17,9 @@ export class UserSessions extends BaseEntity {
   @JoinColumn()
   user: User;
 
-  @Column({ type: "datetime" })
-  expiresAt: string;
+  @CreateDateColumn({})
+  expiresAt: Date;
 
-  @Column({ type: "datetime" })
-  createdAt: string;
+  @CreateDateColumn({})
+  createdAt: Date;
 }

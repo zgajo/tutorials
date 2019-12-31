@@ -1,0 +1,1 @@
+export const USER_SESSION_EXPIRY_HOURS = 1;

@@ -15,4 +15,20 @@ export default class UsersService {
 
     return body;
   }
+
+  static async createUserSession({
+    email,
+    password
+  }: USER_INSERT): Promise<{ id: string }> {
+    const body: { id: string } = await got
+      .post(`${USERS_SERVICE_URI}/sessions`, {
+        json: {
+          email,
+          password
+        }
+      })
+      .json();
+
+    return body;
+  }
 }
