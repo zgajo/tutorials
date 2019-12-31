@@ -18,6 +18,9 @@ services:
     environment:
       - TYPEORM_USERNAME=root
       - TYPEORM_PASSWORD=password
+      - TYPEORM_PORT=3306
+      - TYPEORM_HOST=listings-service-db
+
     ports:
       - 7100:7100
     volumes: # if we make some change, thanks to volumes change will be changed in container immediately
@@ -38,6 +41,9 @@ services:
     environment:
       - TYPEORM_USERNAME=root
       - TYPEORM_PASSWORD=password
+      - TYPEORM_PORT=3306
+      - TYPEORM_HOST=users-service-db
+
     ports:
       - 7101:7101
     volumes:
