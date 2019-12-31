@@ -10,7 +10,8 @@ export class User {
 
   @Column("char", {
     nullable: false,
-    length: 64
+    length: 64,
+    select: false
   })
   passwordHash: string;
 }

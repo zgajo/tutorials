@@ -1,3 +1,5 @@
+import ListingsService from "../../adapters/ListingsService";
+
 interface Listing {
   id?: number;
   title?: string;
@@ -8,15 +10,7 @@ interface Listing {
 }
 
 const listingsResolver = async (): Promise<[Listing?]> => {
-  try {
-    return [
-      {
-        description: "TERTE"
-      }
-    ];
-  } catch (error) {
-    return [];
-  }
+  return await ListingsService.fetchAllListings();
 };
 
 export default listingsResolver;

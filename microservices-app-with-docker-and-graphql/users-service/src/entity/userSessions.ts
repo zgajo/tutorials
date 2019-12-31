@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn
+} from "typeorm";
 import { User } from "./users";
 
 @Entity()
@@ -6,13 +12,8 @@ export class UserSessions {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(
-    _ => User,
-    user => user.id,
-    {
-      nullable: false
-    }
-  )
+  @OneToOne(_ => User)
+  @JoinColumn()
   user: User;
 
   @Column({ type: "datetime" })

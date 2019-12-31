@@ -16,6 +16,7 @@
     "seed": "ts-node ./node_modules/typeorm-seeding/dist/cli.js --config='ormconfig.json' seed"
   },
   "devDependencies": {
+    "@types/got": "^9.6.9",
     "@types/graphql": "^14.5.0",
     "@types/node": "^8.10.55",
     "nodemon": "^1.19.4",
@@ -28,6 +29,7 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "got": "^10.2.0",
     "install": "^0.13.0",
     "mysql": "^2.17.1",
     "mysql2": "^2.1.0",
