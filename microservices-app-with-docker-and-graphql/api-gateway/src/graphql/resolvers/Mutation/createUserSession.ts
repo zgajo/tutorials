@@ -1,5 +1,5 @@
-import { USER_INSERT } from "../../types";
-import UsersService from "../../adapters/UsersService";
+import { USER_INSERT } from "../../../types";
+import UsersService from "../../../adapters/UsersService";
 
 const createUserSessionResolver = async (
   _: any,

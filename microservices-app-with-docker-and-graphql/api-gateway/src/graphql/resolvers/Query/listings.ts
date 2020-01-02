@@ -1,4 +1,4 @@
-import ListingsService from "../../adapters/ListingsService";
+import ListingsService from "../../../adapters/ListingsService";
 
 interface Listing {
   id?: number;

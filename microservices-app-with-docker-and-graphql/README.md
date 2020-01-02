@@ -17,3 +17,7 @@ https://www.youtube.com/watch?v=t5L1uf387q8
 ### How To Create GraphQL Microservices Using Node.js and MySQL | Part 5 | Code With Me!
 
 https://www.youtube.com/watch?v=0LG8xVRoegM
+
+### Creating a GraphQL Microservices-powered React App | Part 6 | Code With Me!
+
+https://www.youtube.com/watch?v=EU7eSofuuZ8
