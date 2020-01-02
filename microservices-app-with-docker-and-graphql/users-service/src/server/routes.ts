@@ -40,6 +40,28 @@ router.post("/sessions", async (req, res, next) => {
   }
 });
 
+router.get("/sessions/:sessionId", async (req, res, next) => {
+  try {
+    if (!req.params.sessionId) {
+      throw new Error("No session id provided");
+    }
+
+    const userSession = await createQueryBuilder(UserSessions, "userSession")
+      .select("userSession")
+      .leftJoinAndSelect("userSession.user", "user")
+      .where({ id: req.params.sessionId })
+      .getOne();
+
+    if (!userSession) {
+      return next(new Error("Invalid userSession ID"));
+    }
+
+    return res.json(userSession);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/users", async (_, res: Response, __) => {
   const users = await createQueryBuilder(User, "user")
     .select("user")
@@ -47,6 +69,26 @@ router.get("/users", async (_, res: Response, __) => {
 
   return res.json(users);
 });
+
+router.get(
+  "/users/:userId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await createQueryBuilder(User, "user")
+        .select("user")
+        .where("user.id = :id", { id: req.params.userId })
+        .getOne();
+
+      if (!user) {
+        return next(new Error("Invalid user ID"));
+      }
+
+      return res.json(user);
+    } catch (error) {
+      return next(error);
+    }
+  }
+);
 
 router.post(
   "/users",
