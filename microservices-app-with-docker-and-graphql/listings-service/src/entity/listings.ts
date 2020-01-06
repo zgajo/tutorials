@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BaseEntity,
+  CreateDateColumn
+} from "typeorm";
 
 @Entity()
 export class Listing extends BaseEntity {
@@ -14,11 +20,11 @@ export class Listing extends BaseEntity {
   })
   description: string;
 
-  @Column({ type: "datetime" })
-  createdAt: string;
+  @CreateDateColumn({})
+  createdAt: Date;
 
-  @Column({ type: "datetime" })
-  updatedAt: string;
+  @CreateDateColumn({})
+  updatedAt: Date;
 
   @Column({ type: "datetime", nullable: true })
   deletedAt: string;

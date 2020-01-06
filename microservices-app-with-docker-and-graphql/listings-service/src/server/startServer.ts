@@ -1,6 +1,6 @@
 import bodyParser from "body-parser";
 import cors from "cors";
-import express from "express";
+import express, { ErrorRequestHandler } from "express";
 import { createConnection } from "typeorm";
 import accessEnv from "../helpers/accessEnv";
 import routes from "./routes";
@@ -19,6 +19,14 @@ app.use(
 );
 
 app.use("/", routes);
+
+const errorMiddlware: ErrorRequestHandler = (err, _, res, __) => {
+  return res.status(500).json({
+    message: err.message
+  });
+};
+
+app.use(errorMiddlware);
 
 app.listen(PORT, "0.0.0.0", async () => {
   await createConnection();
