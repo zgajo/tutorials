@@ -29,6 +29,8 @@ const errorMiddlware: ErrorRequestHandler = (err, _, res, __) => {
 app.use(errorMiddlware);
 
 app.listen(PORT, "0.0.0.0", async () => {
+  console.log("člksfćčdfkskdsfćčfsdčkl");
+
   await createConnection();
 
   console.log(`Users services running on port: ${PORT}`);

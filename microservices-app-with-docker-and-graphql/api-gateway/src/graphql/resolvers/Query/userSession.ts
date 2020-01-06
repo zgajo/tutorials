@@ -3,6 +3,8 @@ const userSessionResolver = async (_: any, args: any, context: any) => {
     throw new Error("Unsuported argument value");
   }
 
+  console.log(context.res.locals);
+
   return context.res.locals.userSession;
 };
 

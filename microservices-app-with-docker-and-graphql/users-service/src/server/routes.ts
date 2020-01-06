@@ -11,6 +11,8 @@ import { UserSessions } from "../entity/userSessions";
 const router = Router();
 
 router.post("/sessions", async (req, res, next) => {
+  console.log("čljsdčfčladld");
+
   if (!req.body.email || !req.body.password) {
     return next(new Error("Invalid body"));
   }
@@ -40,11 +42,28 @@ router.post("/sessions", async (req, res, next) => {
   }
 });
 
+router.delete("/sessions/:sessionId", async (req, res, next) => {
+  console.log("čljsdčfčladld");
+
+  try {
+    if (!req.params.sessionId) {
+      throw new Error("No session id provided");
+    }
+    await UserSessions.delete(req.params.sessionId);
+
+    res.end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/sessions/:sessionId", async (req, res, next) => {
   try {
     if (!req.params.sessionId) {
       throw new Error("No session id provided");
     }
+
+    console.log("lčsjkdčslašqwšpoewš");
 
     const userSession = await createQueryBuilder(UserSessions, "userSession")
       .select("userSession")

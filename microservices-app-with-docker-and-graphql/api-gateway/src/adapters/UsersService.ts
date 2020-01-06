@@ -53,4 +53,16 @@ export default class UsersService {
 
     return body;
   }
+
+  static async deleteUserSession({
+    sessionId
+  }: {
+    sessionId: string;
+  }): Promise<{ id: string }> {
+    const body: { id: string } = await got
+      .delete(`${USERS_SERVICE_URI}/sessions/${sessionId}`)
+      .json();
+
+    return body;
+  }
 }

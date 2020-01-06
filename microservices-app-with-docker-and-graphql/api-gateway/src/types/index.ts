@@ -11,3 +11,7 @@ export interface USER_SESSION_FETCHED {
   userId: string;
   user: USER;
 }
+
+export interface USER_SESSION_DELETE {
+  sessionId: string;
+}
