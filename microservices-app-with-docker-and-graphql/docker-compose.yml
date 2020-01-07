@@ -10,7 +10,11 @@ services:
       - 7000:7000
     volumes: # if we make some change, thanks to volumes change will be changed in container immediately
       - ./api-gateway:/opt/app
-
+    environment:
+      - LISTINGS_SERVICE_URI=http://listings-service
+      - LISTINGS_SERVICE_PORT=7100
+      - USERS_SERVICE_URI=http://users-service
+      - USERS_SERVICE_PORT=7101
   listings-service:
     build: "./listings-service"
     depends_on:
