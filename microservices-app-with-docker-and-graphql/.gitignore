@@ -1,1 +1,5 @@
 .cache
+
+terraform.tfvars
+microservices_demo.*
+.terraform/
