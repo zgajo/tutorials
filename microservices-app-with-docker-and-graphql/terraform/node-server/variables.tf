@@ -3,7 +3,8 @@ variable "ami-id" {
 }
 
 variable "iam-instance-profile" {
-  type = string
+  default = ""
+  type    = string
 }
 
 variable "instance-type" {
@@ -20,10 +21,11 @@ variable "key-pair" {
 }
 
 variable "private-ip" {
-  type = string
+  default = ""
+  type    = string
 }
 
-variable "subnet-ip" {
+variable "subnet-id" {
   default = ""
   type    = string
 }
