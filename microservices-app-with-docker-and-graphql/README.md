@@ -52,9 +52,16 @@ Solution:
 
 Install new version of nodejs
 
-
 ## DEVOPS
 
 - ### Deploying React/Node.js Microservices to AWS using Terraform | Part 1 | Code With Me!
 
 https://www.youtube.com/watch?v=TMWOdaO8_Is
+
+- ### AWS DevOps - Deploying Node.js/GraphQL Microservices to AWS using Terraform | Part 2 | Code With Me!
+
+https://www.youtube.com/watch?v=jdqYmpZic7s
+
+- ### Deploy a React/Node.js App Using Microservices onto AWS using Terraform | Part 3 | Code With Me!
+
+https://www.youtube.com/watch?v=ln32o2hoOb4
