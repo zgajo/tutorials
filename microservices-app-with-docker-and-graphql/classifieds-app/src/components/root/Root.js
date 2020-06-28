@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
-// import graphqlClient from "#root/api/graphqlClient";
-// import { setSession } from "#root/store/ducks/session";
+import graphqlClient from "#root/api/graphqlClient";
+import { setSession } from "#root/store/ducks/session";
 
-// import AccountDetails from "./AccountDetails";
-// import Listings from "./Listings";
+import AccountDetails from "./AccountDetails";
+import Listings from "./Listings";
 
 const query = gql`
   {
@@ -46,29 +46,29 @@ const Wrapper = styled.div`
 `;
 
 const Root = () => {
-  // const dispatch = useDispatch();
-  // const [initialised, setInitialised] = useState(false);
+  const dispatch = useDispatch();
+  const [initialised, setInitialised] = useState(false);
 
-  // useEffect(() => {
-  //   graphqlClient.query({ query }).then(({ data }) => {
-  //     if (data.userSession) {
-  //       dispatch(setSession(data.userSession));
-  //     }
-  //     setInitialised(true);
-  //   });
-  // }, []);
+  useEffect(() => {
+    graphqlClient.query({ query }).then(({ data }) => {
+      if (data.userSession) {
+        dispatch(setSession(data.userSession));
+      }
+      setInitialised(true);
+    });
+  }, []);
 
-  // if (!initialised) return "Loading...";
+  if (!initialised) return "Loading...";
 
   return (
     <Wrapper>
       <Container>
-        {/* <Content>
+        <Content>
           <Listings />
         </Content>
         <Sidebar>
           <AccountDetails />
-        </Sidebar> */}
+        </Sidebar>
       </Container>
     </Wrapper>
   );
