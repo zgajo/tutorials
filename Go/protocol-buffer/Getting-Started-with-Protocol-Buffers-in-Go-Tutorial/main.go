@@ -21,9 +21,11 @@ const (
 var endianness = binary.LittleEndian
 
 func main() {
-	fmt.Println("hello world")
-
+	fmt.Println("********** list ************")
 	list()
+
+	fmt.Println("********** bufferList ************")
+	bufferList()
 
 	// this works when not reading from file
 	// structToUnmarshal := &Person{}
@@ -139,4 +141,50 @@ func list() error {
 		fmt.Println(person.Name)
 	}
 
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func bufferList() error {
+	f, err := os.Open(dbPath)
+	check(err)
+
+	b1 := make([]byte, sizeOfLength)
+	_, err = f.Read(b1)
+	check(err)
+	fmt.Println("b1", b1, b1[:4])
+	// fmt.Println("bytes: ", n1, "string: ", (b1[:n1]))
+
+	// fmt.Println("n1", n1)
+
+	var l length
+	fmt.Println("binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l)", binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l))
+	if err := binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l); err != nil {
+		return fmt.Errorf("could not decode message length: %v", err)
+	}
+	fmt.Println("L:", l)
+
+	// to := sizeOfLength + int(l)
+	o2, err := f.Seek(sizeOfLength, 0)
+	fmt.Println("o2:", o2)
+	check(err)
+	b2 := make([]byte, l)
+	n2, err := f.Read(b2)
+	check(err)
+	fmt.Println("b2:", b2)
+	fmt.Printf("%d bytes @ %d: ", n2, o2)
+	fmt.Println()
+	var person Person
+	if err := proto.Unmarshal(b2, &person); err != nil {
+		return fmt.Errorf("could not read task: %v", err)
+	}
+
+	fmt.Println(person.Name)
+	fmt.Println(person.Age)
+
+	return nil
 }
