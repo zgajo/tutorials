@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -153,38 +154,74 @@ func bufferList() error {
 	f, err := os.Open(dbPath)
 	check(err)
 
-	b1 := make([]byte, sizeOfLength)
-	_, err = f.Read(b1)
+	delimiter := make([]byte, sizeOfLength)
+	_, err = f.Read(delimiter)
 	check(err)
-	fmt.Println("b1", b1, b1[:4])
-	// fmt.Println("bytes: ", n1, "string: ", (b1[:n1]))
 
-	// fmt.Println("n1", n1)
+	pointer := 0
 
-	var l length
-	fmt.Println("binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l)", binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l))
-	if err := binary.Read(bytes.NewReader(b1[:sizeOfLength]), endianness, &l); err != nil {
-		return fmt.Errorf("could not decode message length: %v", err)
+	for {
+		pointer += sizeOfLength
+
+		if len(delimiter) == 0 {
+			return nil
+		} else if len(delimiter) < sizeOfLength {
+			return fmt.Errorf("remaining odd %d bytes, what to do?", len(delimiter))
+		}
+
+		fmt.Println("delimiter", delimiter)
+		// fmt.Println("bytes: ", n1, "string: ", (delimiter[:n1]))
+
+		// fmt.Println("n1", n1)
+
+		var len length
+		// binary.Read sets length from delimiter into &len
+		if err := binary.Read(bytes.NewReader(delimiter[:sizeOfLength]), endianness, &len); err != nil {
+			return fmt.Errorf("could not decode message length: %v", err)
+		}
+		fmt.Println("L:", len)
+
+		fmt.Println("pointer", pointer)
+
+		o2, err := f.Seek(int64(pointer), 0)
+		check(err)
+		fmt.Println("o2:", o2)
+
+		protoMessage := make([]byte, len)
+		n2, err := f.Read(protoMessage)
+		check(err)
+
+		fmt.Println("protoMessage:", protoMessage)
+		fmt.Printf("%d bytes @ %d: ", n2, o2)
+		fmt.Println()
+
+		var person Person
+		if err := proto.Unmarshal(protoMessage, &person); err != nil {
+			return fmt.Errorf("could not read task: %v", err)
+		}
+
+		fmt.Println(person.Name)
+		fmt.Println(person.Age)
+
+		pointer = int(pointer) + int(len)
+		ret, err := f.Seek(int64(pointer), 0)
+		check(err)
+
+		fmt.Println("ret", ret)
+		n, err := f.Read(delimiter)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			fmt.Println(err)
+			return nil
+		}
+		check(err)
+
+		fmt.Println("n: ", n)
+		fmt.Println("delimiter 2", delimiter)
+		fmt.Println("pointer", pointer)
 	}
-	fmt.Println("L:", l)
-
-	// to := sizeOfLength + int(l)
-	o2, err := f.Seek(sizeOfLength, 0)
-	fmt.Println("o2:", o2)
-	check(err)
-	b2 := make([]byte, l)
-	n2, err := f.Read(b2)
-	check(err)
-	fmt.Println("b2:", b2)
-	fmt.Printf("%d bytes @ %d: ", n2, o2)
-	fmt.Println()
-	var person Person
-	if err := proto.Unmarshal(b2, &person); err != nil {
-		return fmt.Errorf("could not read task: %v", err)
-	}
-
-	fmt.Println(person.Name)
-	fmt.Println(person.Age)
 
 	return nil
 }
