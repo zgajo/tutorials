@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"fmt"
@@ -22,11 +23,13 @@ const (
 var endianness = binary.LittleEndian
 
 func main() {
-	fmt.Println("********** list ************")
-	list()
+	// fmt.Println("********** list ************")
+	// list()
 
-	fmt.Println("********** bufferList ************")
-	bufferList()
+	// fmt.Println("********** bufferList ************")
+	// bufferList()
+	fmt.Println("********** bufioList ************")
+	bufioList()
 
 	// this works when not reading from file
 	// structToUnmarshal := &Person{}
@@ -160,6 +163,8 @@ func bufferList() error {
 
 	pointer := 0
 
+	defer f.Close()
+
 	for {
 		pointer += sizeOfLength
 
@@ -221,6 +226,72 @@ func bufferList() error {
 		fmt.Println("n: ", n)
 		fmt.Println("delimiter 2", delimiter)
 		fmt.Println("pointer", pointer)
+	}
+
+	return nil
+}
+
+func getMessageLengthBytes(r4 *bufio.Reader, pointer int) ([]byte, error) {
+	_, err := r4.Discard(pointer)
+	check(err)
+
+	lengthBytes, err := r4.Peek(sizeOfLength)
+
+	if err != nil {
+		if err == io.EOF {
+			return nil, err
+		}
+		check(err)
+	}
+	return lengthBytes, err
+}
+
+func readProtoMessage(r4 *bufio.Reader, len int) error {
+	// take
+	protobufMessage, err := r4.Peek(int(len))
+	check(err)
+
+	var person Person
+	if err := proto.Unmarshal(protobufMessage, &person); err != nil {
+		return fmt.Errorf("could not read task: %v", err)
+	}
+
+	fmt.Println(person.Name)
+	fmt.Println(person.Age)
+
+	fmt.Println("bytes: ", sizeOfLength, protobufMessage)
+
+	return nil
+}
+
+func bufioList() error {
+	f, err := os.Open(dbPath)
+	check(err)
+
+	r4 := bufio.NewReader(f)
+
+	pointer := 0
+
+	for {
+		lengthBytes, err := getMessageLengthBytes(r4, pointer)
+		if err == io.EOF {
+			break
+		}
+
+		var len length
+		// binary.Read sets length from delimiter into &len
+		if err := binary.Read(bytes.NewReader(lengthBytes[:sizeOfLength]), endianness, &len); err != nil {
+			return fmt.Errorf("could not decode message length: %v", err)
+		}
+
+		// skipping lengthBytes
+		_, err = r4.Discard(sizeOfLength)
+		check(err)
+
+		err = readProtoMessage(r4, int(len))
+		check(err)
+
+		pointer = int(len)
 	}
 
 	return nil
