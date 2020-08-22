@@ -8,12 +8,15 @@ import (
 	"os"
 	"runtime"
 
+	"example.com/src/pg1"
+	// "example.com/src/example.com/pbf_darko"
 	"github.com/qedus/osmpbf"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
 	PrintMemUsage()
+	pg1.Testing()
+	// pbf_darko.Node{}
 	f, err := os.Open("croatia-latest.osm.pbf")
 	if err != nil {
 		log.Fatal(err)
@@ -48,13 +51,6 @@ func main() {
 					fmt.Println(v.Tags)
 				}
 
-				node := OSM{
-					ID: v.ID,
-				}
-
-				n, err := proto.Marshal(node)
-
-				addToNodesList(v)
 				nc++
 			case *osmpbf.Way:
 				// Process Way v.
@@ -111,14 +107,3 @@ const (
 )
 
 var endianness = binary.BigEndian
-
-func addToNodesList(node *osmpbf.Node) {
-
-	n, err := proto.Marshal(node)
-
-	if err != nil {
-		return fmt.Errorf("could not encode task: %v", err)
-	}
-
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-}

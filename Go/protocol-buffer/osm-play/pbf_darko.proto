@@ -14,10 +14,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
+syntax="proto2";
 option optimize_for = LITE_RUNTIME;
 option java_package = "crosby.binary";
-package OSMPBFDARKO;
+package pbf.darko;
+option go_package = "example.com/pbf_darko";
 
 /* OSM Binary file format
 
