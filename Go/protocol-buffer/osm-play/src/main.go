@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"time"
 
-	"example.com/src/osmpbfsearchfile"
+	"example.com/src/mojtest"
 	"example.com/src/pg1"
 )
 
@@ -23,9 +23,12 @@ func main() {
 	defer f.Close()
 	start := time.Now()
 
-	osmpbfsearchfile.ListNodes(f)
+	// osmpbfsearchfile.ListNodes(f)
 	// err = mojtest.WriteIndexes(f)
+	err = mojtest.FindPlace("Rovinj")
 	// err = mojtest.List()
+
+	// mojtest.SortNodes(f)
 
 	if err != nil {
 		log.Fatal(err)

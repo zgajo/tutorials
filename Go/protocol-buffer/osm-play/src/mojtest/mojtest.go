@@ -56,6 +56,14 @@ func WriteIndexes(f *os.File) error {
 		}
 	}
 
+	StoreCities(nodeIndexes)
+
+	return nil
+
+}
+
+// StoreCities ,
+func StoreCities(nodeIndexes []*indexed_file.CityPart) {
 	fileIndexes := []*indexed_file.FileIndex{}
 
 	fileIndex := &indexed_file.FileIndex{
@@ -93,9 +101,6 @@ func WriteIndexes(f *os.File) error {
 	if err := fil.Close(); err != nil {
 		log.Fatal("could not close file ", fileIndexDb, err)
 	}
-
-	return nil
-
 }
 
 // List :
@@ -116,6 +121,7 @@ func List() error {
 	for _, fl := range storageIndexes.FileIndex {
 		for _, ci := range fl.CityIndex {
 
+			// fmt.Println(ci.GetName())
 			if ci.GetName() == "Rovinj" {
 				fmt.Println(ci.GetName())
 				found = true
@@ -132,6 +138,58 @@ func List() error {
 	}
 
 	return nil
+}
+
+// FindPlace works only on sorted places
+func FindPlace(place string) error {
+	fi, err := ioutil.ReadFile(fileIndexDb)
+	if err != nil {
+		return fmt.Errorf("could not read %s: %v", fileIndexDb, err)
+	}
+
+	storageIndexes := indexed_file.StoredIndex{}
+
+	if err := proto.Unmarshal(fi, &storageIndexes); err != nil {
+		return fmt.Errorf("could not read task: %v", err)
+	}
+
+	for _, fl := range storageIndexes.FileIndex {
+
+		found := binarySearch(place, fl.CityIndex)
+
+		if found {
+			fmt.Println(place, " found")
+			break
+		} else {
+			fmt.Println(place, " not found")
+		}
+	}
+
+	return nil
+}
+
+func binarySearch(needle string, haystack []*indexed_file.CityPart) bool {
+
+	low := 0
+	high := len(haystack) - 1
+	found := false
+
+	for low <= high {
+		median := (low + high) / 2
+
+		if haystack[median].Name == needle {
+			found = true
+			break
+		}
+
+		if checkStrings(haystack[median].Name, needle) {
+			low = median + 1
+		} else {
+			high = median - 1
+		}
+	}
+
+	return found
 }
 
 // func add(node osmpbf.Node) error {
