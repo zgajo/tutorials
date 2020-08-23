@@ -121,8 +121,9 @@ func List() error {
 	for _, fl := range storageIndexes.FileIndex {
 		for _, ci := range fl.CityIndex {
 
+			fmt.Println(ci.GetName())
 			// fmt.Println(ci.GetName())
-			if ci.GetName() == "Rovinj" {
+			if ci.GetName() == "Žužići" {
 				fmt.Println(ci.GetName())
 				found = true
 				break

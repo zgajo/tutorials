@@ -25,7 +25,7 @@ func main() {
 
 	// osmpbfsearchfile.ListNodes(f)
 	// err = mojtest.WriteIndexes(f)
-	err = mojtest.FindPlace("Rovinj")
+	err = mojtest.FindPlace("Žužići")
 	// err = mojtest.List()
 
 	// mojtest.SortNodes(f)
