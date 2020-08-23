@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package indexed.file;
+option optimize_for = LITE_RUNTIME;
+option go_package = "example.com/indexed_file";
+option java_package = "crosby.binary";
+
+message StoredIndex {
+  uint32 version = 1;
+
+  // System.currentTimeMillis()
+  int64 dateCreated = 18;
+
+  repeated FileIndex fileIndex = 7;
+  
+}
+
+
+message FileIndex {
+	int64 size = 1;
+	int64 dateModified = 2;
+	string fileName = 3;
+	int32 version = 4;
+	repeated CityPart cityIndex = 8;
+}
+
+
+message CityPart {
+	int64 size = 1;
+	int64 offset = 2;
+  string name = 3;
+	string nameEn = 4;
+	int32 indexNameOffset = 5;
+	repeated string additionalTags = 6;
+}

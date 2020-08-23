@@ -3,82 +3,36 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"runtime"
+	"time"
 
+	"example.com/src/osmpbfsearchfile"
 	"example.com/src/pg1"
-	// "example.com/src/example.com/pbf_darko"
-	"github.com/qedus/osmpbf"
 )
 
 func main() {
 	PrintMemUsage()
 	pg1.Testing()
 	// pbf_darko.Node{}
-	f, err := os.Open("croatia-latest.osm.pbf")
+	f, err := os.Open("croatia-places.pbf")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
+	start := time.Now()
 
-	d := osmpbf.NewDecoder(f)
-	PrintMemUsage()
+	osmpbfsearchfile.ListNodes(f)
+	// err = mojtest.WriteIndexes(f)
+	// err = mojtest.List()
 
-	// use more memory from the start, it is faster
-	d.SetBufferSize(osmpbf.MaxBlobSize)
-	PrintMemUsage()
-
-	// start decoding with several goroutines, it is faster
-	err = d.Start(runtime.GOMAXPROCS(-1))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var nc, wc, rc uint64
-	for {
-		if v, err := d.Decode(); err == io.EOF {
-			break
-		} else if err != nil {
-			log.Fatal(err)
-		} else {
-			switch v := v.(type) {
-			case *osmpbf.Node:
-				// Process Node v.
-				if v.ID == 29909361 {
-					fmt.Println("Node")
-					fmt.Println(v.Tags)
-				}
-
-				nc++
-			case *osmpbf.Way:
-				// Process Way v.
-
-				if v.ID == 131864041 {
-					fmt.Println("Ođe je:", v)
-				}
-				// for _, c := range v.NodeIDs {
-				// 	// Rovinjsko selo
-				// 	if c == 29909361 {
-				// 		fmt.Println("Way:", v)
-				// 	}
-				// }
-
-				wc++
-			case *osmpbf.Relation:
-				// Process Relation v.
-				if v.ID == 283575035 {
-					fmt.Println("Relation:", v)
-				}
-				rc++
-			default:
-				log.Fatalf("unknown type %T\n", v)
-			}
-		}
-	}
-
-	fmt.Printf("Nodes: %d, Ways: %d, Relations: %d\n", nc, wc, rc)
+	elapsed := time.Since(start)
+	log.Printf("listiNodes took %s", elapsed)
 	PrintMemUsage()
 
 }
