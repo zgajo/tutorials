@@ -25,10 +25,34 @@ func main() {
 
 	// osmpbfsearchfile.ListNodes(f)
 	// err = mojtest.WriteIndexes(f)
-	err = mojtest.FindPlace("Žužići")
+	// err = mojtest.FindPlace("Žužići")
 	// err = mojtest.List()
 
+	// b := []int{}
+	// b = append(b, 1)
+	// b = append(b, 2)
+	// b = append(b, 3)
+	// b = append(b, 4)
+	// fmt.Println(len(b), b)
+	// b[len(b)] = 5
+
 	// mojtest.SortNodes(f)
+	btree := mojtest.InitBtree(2)
+	btree.InsertKey(2)
+	btree.InsertKey(7)
+	btree.InsertKey(3)
+	btree.InsertKey(5)
+	btree.InsertKey(6)
+	// btree.InsertKey(1)
+	// btree.InsertKey(22)
+	// btree.InsertKey(23)
+	// s := []int{1, 2, 3}
+	// s2 := []int{4, 5, 6}
+
+	// copy(s2[1:], s2[:2])
+	// // s2 = append(s2, 0)
+	// fmt.Println(s2)
+	fmt.Println(btree.Root)
 
 	if err != nil {
 		log.Fatal(err)
