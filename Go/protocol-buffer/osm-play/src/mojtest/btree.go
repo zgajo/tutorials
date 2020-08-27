@@ -117,12 +117,12 @@ func (tree *BTree) InsertKey(key int) {
 	if tree.Root.isLeaf() {
 		// if root is not full, sort and insert key into root node
 		if !tree.isNodeFull(tree.Root) {
-			tree.insertKeyIntoLeaf(tree.Root, key)
+			tree.insertIntoNotFullLeaf(tree.Root, key)
 			return
 		}
 
 		// else
-		tree.insertKeyIntoLeaf(tree.Root, key)
+		tree.insertIntoNotFullLeaf(tree.Root, key)
 		tree.splitRootWhenLeaf()
 		return
 	}
@@ -131,7 +131,28 @@ func (tree *BTree) InsertKey(key int) {
 	tree.searchChild(tree.Root, key)
 }
 
-func (tree *BTree) insertKeyIntoLeaf(node *Node, key int) {
+func (tree *BTree) searchChild(node *Node, key int) {
+	// search for index of last index key which is larger then key which is going to be inserted
+	childIndex := node.searchChildrenIndexPosition(key)
+
+	// use found index key as index of children array node
+	// repeat this step for every nested child until last node is leaf
+	if !node.Children[childIndex].isLeaf() {
+		fmt.Println("Not found leaf")
+		tree.searchChild(&node.Children[childIndex], key)
+	}
+
+	// insert key into leaf
+	// if node is not full insert key into node and sort node
+	if !tree.isNodeFull(&node.Children[childIndex]) {
+		tree.insertIntoNotFullLeaf(&node.Children[childIndex], key)
+		return
+	}
+
+	tree.insertIntoFullLeaf(&node.Children[childIndex], key)
+}
+
+func (tree *BTree) insertIntoNotFullLeaf(node *Node, key int) {
 	// Initialize index as index of rightmost element
 	i := node.numOfKeys() - 1
 	// insert key as last element
@@ -145,6 +166,77 @@ func (tree *BTree) insertKeyIntoLeaf(node *Node, key int) {
 		node.Keys[i] = tmp
 		i--
 	}
+}
+
+func (tree *BTree) insertIntoFullLeaf(node *Node, key int) {
+
+	middle := tree.MinDegree
+
+	// Initialize index as index of rightmost element
+	i := node.numOfKeys() - 1
+	// insert key as last element
+	keys := append(node.Keys, key)
+
+	// The following loop:
+	// a) Moves all greater keys than last inserted to one place ahead
+	for i >= 0 && keys[i] > key {
+		tmp := keys[i+1]
+		keys[i+1] = keys[i]
+		keys[i] = tmp
+		i--
+	}
+
+	// create node left[:middle] and node right [middle+1:]
+	left := &Node{Keys: append([]int(nil), keys[:middle]...)}
+	right := &Node{Keys: append([]int(nil), keys[middle+1:]...)}
+
+	keyToParent := keys[middle]
+
+	// if parent node is not full, insert middle key into it, add new children
+	if !tree.isNodeFull(node.Parent) {
+		tree.insertIntoNotFullParent(node.Parent, keyToParent, left, right)
+	}
+
+}
+
+func (tree *BTree) insertIntoNotFullParent(node *Node, key int, left *Node, right *Node) {
+
+	// Initialize index as index of rightmost element
+	i := node.numOfKeys() - 1
+	index := node.searchChildrenIndexPosition(key)
+
+	// insert key as last element
+	node.Keys = append(node.Keys, key)
+
+	// The following loop:
+	// a) Moves all greater keys than last inserted to one place ahead
+	for i >= index && node.Keys[i] > key {
+		tmp := node.Keys[i+1]
+		node.Keys[i+1] = node.Keys[i]
+		node.Keys[i] = tmp
+		i--
+	}
+
+	// Insert empty node which will be overwritten
+	node.Children = append(node.Children, Node{})
+
+	// Move all children from rightmost to index position of new key
+	for j := len(node.Keys) - 1; j > index; j-- {
+		tmp := node.Children[j+1]
+		node.Children[j+1] = node.Children[j]
+		node.Children[j] = tmp
+	}
+
+	left.Parent = node
+	right.Parent = node
+	// Overwrite
+	node.Children[index] = *left
+	node.Children[index+1] = *right
+
+}
+
+func (tree *BTree) insertIntoFullParent() {
+
 }
 
 func (tree *BTree) splitRootWhenLeaf() {
@@ -164,85 +256,6 @@ func (tree *BTree) splitRootWhenLeaf() {
 	newRoot.Children = []Node{*left, *right}
 
 	tree.Root = newRoot
-}
-
-func (tree *BTree) searchChild(node *Node, key int) {
-	// search for index of last index key which is larger then key which is going to be inserted
-	childIndex := node.searchChildrenIndexPosition(key)
-
-	// use found index key as index of children array node
-	// repeat this step for every nested child until last node is leaf
-	if !node.Children[childIndex].isLeaf() {
-		fmt.Println("Not found leaf")
-		tree.searchChild(&node.Children[childIndex], key)
-	}
-
-	// insert key into leaf
-	// if node is not full insert key into node and sort node
-	if !tree.isNodeFull(&node.Children[childIndex]) {
-		tree.insertKeyIntoLeaf(&node.Children[childIndex], key)
-		return
-	}
-
-	// else
-	tree.insertKeyIntoLeaf(&node.Children[childIndex], key)
-	tree.splitLeaf(&node.Children[childIndex], key)
-}
-
-func (tree *BTree) splitLeaf(node *Node, key int) {
-	middle := tree.MinDegree
-	prevParent := node.Parent
-	// create node left[:middle] and node right [middle+1:]
-	left := &Node{Keys: append([]int(nil), node.Keys[:middle]...)}
-	right := &Node{Keys: append([]int(nil), node.Keys[middle+1:]...)}
-
-	// create new node with one key [middle] from previous root and set previous created left and right nodes as his two children
-	newNode := &Node{
-		Keys: []int{node.Keys[middle]},
-	}
-
-	left.Parent = prevParent
-	right.Parent = prevParent
-
-	newNode.Children = []Node{*left, *right}
-
-	node = newNode
-
-	tree.insertIntoParent(prevParent, node)
-}
-
-func (tree *BTree) insertIntoParent(parent *Node, node *Node) {
-	if !tree.isNodeFull(parent) {
-		// Initialize index as index of rightmost element
-		i := parent.numOfKeys() - 1
-		// insert key as last element
-		key := node.Keys[0]
-		parent.Keys = append(parent.Keys, key)
-
-		// The following loop:
-		// a) Moves all greater keys than last inserted to one place ahead
-		for i >= 0 && parent.Keys[i] > key {
-			tmp := parent.Keys[i+1]
-			parent.Keys[i+1] = parent.Keys[i]
-			parent.Keys[i] = tmp
-			i--
-		}
-
-		// Insert empty node which will be deleted
-		parent.Children = append(parent.Children, Node{})
-
-		pos := i + 1
-
-		for j := pos; j < len(parent.Children)-1; j++ {
-			tmp := parent.Children[j+1]
-			parent.Children[j+1] = parent.Children[j]
-			parent.Children[j] = tmp
-		}
-
-		parent.Children[pos] = node.Children[0]
-		parent.Children[pos+1] = node.Children[1]
-
-	}
 }
 
 func (node *Node) searchChildrenIndexPosition(key int) int {

@@ -42,20 +42,25 @@ func main() {
 	btree.InsertKey(7)
 	btree.InsertKey(3)
 	btree.InsertKey(5)
+	btree.InsertKey(4)
 	btree.InsertKey(6)
-	btree.InsertKey(1)
 	btree.InsertKey(22)
 	btree.InsertKey(23)
+	// btree.InsertKey(1)
 	btree.InsertKey(28)
 	btree.InsertKey(35)
-	btree.InsertKey(30)
+	fmt.Println("btree.Root", btree.Root)
+	btree.InsertKey(1)
+	// btree.InsertKey(30)
+	// btree.InsertKey(25)
+	// btree.InsertKey(24)
 	// s := []int{1, 2, 3}
 	// s2 := []int{4, 5, 6}
 
 	// copy(s2[1:], s2[:2])
 	// // s2 = append(s2, 0)
 	// fmt.Println(s2)
-	fmt.Println(btree.Root)
+	fmt.Println("btree.Root", btree.Root)
 
 	if err != nil {
 		log.Fatal(err)
