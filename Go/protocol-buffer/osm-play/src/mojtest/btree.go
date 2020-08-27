@@ -56,6 +56,7 @@ import "fmt"
 type Node struct {
 	Keys     []int  // An array of keys
 	Children []Node // An array of child pointers
+	Parent   *Node
 }
 
 // CreateNode : Creates new node
@@ -99,7 +100,7 @@ func InitBtree(m int) *BTree {
 }
 
 // isLeaf : is true when node is leaf. Otherwise false
-func (tree *BTree) isFull(node *Node) bool {
+func (tree *BTree) isNodeFull(node *Node) bool {
 	return node.numOfKeys() == tree.MaxDegree-1
 }
 
@@ -115,13 +116,13 @@ func (tree *BTree) InsertKey(key int) {
 	// check if root is leaf
 	if tree.Root.isLeaf() {
 		// if root is not full, sort and insert key into root node
-		if !tree.isFull(tree.Root) {
-			tree.insertKeyIntoRoot(key)
+		if !tree.isNodeFull(tree.Root) {
+			tree.insertKeyIntoLeaf(tree.Root, key)
 			return
 		}
 
 		// else
-		tree.insertKeyIntoRoot(key)
+		tree.insertKeyIntoLeaf(tree.Root, key)
 		tree.splitRootWhenLeaf()
 		return
 	}
@@ -130,18 +131,18 @@ func (tree *BTree) InsertKey(key int) {
 	tree.searchChild(tree.Root, key)
 }
 
-func (tree *BTree) insertKeyIntoRoot(key int) {
+func (tree *BTree) insertKeyIntoLeaf(node *Node, key int) {
 	// Initialize index as index of rightmost element
-	i := tree.Root.numOfKeys() - 1
+	i := node.numOfKeys() - 1
 	// insert key as last element
-	tree.Root.Keys = append(tree.Root.Keys, key)
+	node.Keys = append(node.Keys, key)
 
 	// The following loop:
 	// a) Moves all greater keys than last inserted to one place ahead
-	for i >= 0 && tree.Root.Keys[i] > key {
-		tmp := tree.Root.Keys[i+1]
-		tree.Root.Keys[i+1] = tree.Root.Keys[i]
-		tree.Root.Keys[i] = tmp
+	for i >= 0 && node.Keys[i] > key {
+		tmp := node.Keys[i+1]
+		node.Keys[i+1] = node.Keys[i]
+		node.Keys[i] = tmp
 		i--
 	}
 }
@@ -154,9 +155,13 @@ func (tree *BTree) splitRootWhenLeaf() {
 
 	// create new node with one key [middle] from previous root and set previous created left and right nodes as his two children
 	newRoot := &Node{
-		Keys:     []int{tree.Root.Keys[middle]},
-		Children: []Node{*left, *right},
+		Keys: []int{tree.Root.Keys[middle]},
 	}
+
+	left.Parent = newRoot
+	right.Parent = newRoot
+
+	newRoot.Children = []Node{*left, *right}
 
 	tree.Root = newRoot
 }
@@ -173,6 +178,71 @@ func (tree *BTree) searchChild(node *Node, key int) {
 	}
 
 	// insert key into leaf
+	// if node is not full insert key into node and sort node
+	if !tree.isNodeFull(&node.Children[childIndex]) {
+		tree.insertKeyIntoLeaf(&node.Children[childIndex], key)
+		return
+	}
+
+	// else
+	tree.insertKeyIntoLeaf(&node.Children[childIndex], key)
+	tree.splitLeaf(&node.Children[childIndex], key)
+}
+
+func (tree *BTree) splitLeaf(node *Node, key int) {
+	middle := tree.MinDegree
+	prevParent := node.Parent
+	// create node left[:middle] and node right [middle+1:]
+	left := &Node{Keys: append([]int(nil), node.Keys[:middle]...)}
+	right := &Node{Keys: append([]int(nil), node.Keys[middle+1:]...)}
+
+	// create new node with one key [middle] from previous root and set previous created left and right nodes as his two children
+	newNode := &Node{
+		Keys: []int{node.Keys[middle]},
+	}
+
+	left.Parent = prevParent
+	right.Parent = prevParent
+
+	newNode.Children = []Node{*left, *right}
+
+	node = newNode
+
+	tree.insertIntoParent(prevParent, node)
+}
+
+func (tree *BTree) insertIntoParent(parent *Node, node *Node) {
+	if !tree.isNodeFull(parent) {
+		// Initialize index as index of rightmost element
+		i := parent.numOfKeys() - 1
+		// insert key as last element
+		key := node.Keys[0]
+		parent.Keys = append(parent.Keys, key)
+
+		// The following loop:
+		// a) Moves all greater keys than last inserted to one place ahead
+		for i >= 0 && parent.Keys[i] > key {
+			tmp := parent.Keys[i+1]
+			parent.Keys[i+1] = parent.Keys[i]
+			parent.Keys[i] = tmp
+			i--
+		}
+
+		// Insert empty node which will be deleted
+		parent.Children = append(parent.Children, Node{})
+
+		pos := i + 1
+
+		for j := pos; j < len(parent.Children)-1; j++ {
+			tmp := parent.Children[j+1]
+			parent.Children[j+1] = parent.Children[j]
+			parent.Children[j] = tmp
+		}
+
+		parent.Children[pos] = node.Children[0]
+		parent.Children[pos+1] = node.Children[1]
+
+	}
 }
 
 func (node *Node) searchChildrenIndexPosition(key int) int {
