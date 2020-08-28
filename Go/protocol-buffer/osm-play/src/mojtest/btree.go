@@ -99,127 +99,145 @@ func InitBtree(m int) *BTree {
 	}
 }
 
-// isLeaf : is true when node is leaf. Otherwise false
-func (tree *BTree) isNodeFull(node *Node) bool {
-	return node.numOfKeys() == tree.MaxDegree-1
+// Get searches the node in the tree by key and returns its value or nil if key is not found in tree.
+// Second return parameter is true if key was found, otherwise false.
+// Key should adhere to the comparator's type assertion, otherwise method panics.
+func (tree *BTree) Get(key int) (value interface{}, found bool) {
+	node, index, found := tree.searchRecursively(tree.Root, key)
+	if found {
+		return node.Keys[index], true
+	}
+	return nil, false
 }
 
-// InsertKey - INSERT KEY
-func (tree *BTree) InsertKey(key int) {
-	// check if root is null
+// Put inserts key-value pair node into the tree.
+// If key already exists, then its value is updated with the new value.
+// Key should adhere to the comparator's type assertion, otherwise method panics.
+func (tree *BTree) Put(key int) {
+
 	if tree.Root == nil {
-		// create new node and set it as root
-		tree.Root = CreateNode()
-		tree.Root.Keys = append(tree.Root.Keys, key)
-		return
-	}
-	// check if root is leaf
-	if tree.Root.isLeaf() {
-		// if root is not full, sort and insert key into root node
-		if !tree.isNodeFull(tree.Root) {
-			tree.insertIntoNotFullLeaf(tree.Root, key)
-			return
-		}
-
-		// else
-		tree.insertIntoNotFullLeaf(tree.Root, key)
-		tree.splitRootWhenLeaf()
+		tree.Root = &Node{Keys: []int{key}, Children: []*Node{}}
+		// tree.size++
 		return
 	}
 
-	// if root is not leaf
-	tree.searchChild(tree.Root, key)
-}
-
-func (tree *BTree) searchChild(node *Node, key int) {
-	// search for index of last index key which is larger then key which is going to be inserted
-	childIndex := node.searchChildrenIndexPosition(key)
-
-	// use found index key as index of children array node
-	// repeat this step for every nested child until last node is leaf
-	if !node.Children[childIndex].isLeaf() {
-		tree.searchChild(node.Children[childIndex], key)
-		return
-	}
-
-	// insert key into leaf
-	// if node is not full insert key into node and sort node
-	if !tree.isNodeFull(node.Children[childIndex]) {
-
-		tree.insertIntoNotFullLeaf(node.Children[childIndex], key)
-		return
-	}
-
-	tree.insertIntoFullLeaf(node.Children[childIndex], key)
-}
-
-func (tree *BTree) insertIntoNotFullLeaf(node *Node, key int) {
-	// Initialize index as index of rightmost element
-	i := node.numOfKeys() - 1
-	// insert key as last element
-	node.Keys = append(node.Keys, key)
-
-	// The following loop:
-	// a) Moves all greater keys than last inserted to one place ahead
-	for i >= 0 && node.Keys[i] > key {
-		tmp := node.Keys[i+1]
-		node.Keys[i+1] = node.Keys[i]
-		node.Keys[i] = tmp
-		i--
+	if tree.insert(tree.Root, key) {
+		// tree.size++
 	}
 }
 
-func (tree *BTree) insertIntoFullLeaf(node *Node, key int) {
-
-	middle := tree.MinDegree
-
-	// Initialize index as index of rightmost element
-	i := node.numOfKeys() - 1
-	// insert key as last element
-	keys := append(node.Keys, key)
-
-	// The following loop:
-	// a) Moves all greater keys than last inserted to one place ahead
-	for i >= 0 && keys[i] > key {
-		tmp := keys[i+1]
-		keys[i+1] = keys[i]
-		keys[i] = tmp
-		i--
+func (tree *BTree) insert(node *Node, key int) (inserted bool) {
+	if tree.isLeaf(node) {
+		return tree.insertIntoLeaf(node, key)
 	}
+	return tree.insertIntoInternal(node, key)
+}
 
-	// create node left[:middle] and node right [middle+1:]
-	left := &Node{Keys: append([]int(nil), keys[:middle]...)}
-	right := &Node{Keys: append([]int(nil), keys[middle+1:]...)}
+func (tree *BTree) insertIntoLeaf(node *Node, key int) (inserted bool) {
+	insertPosition, found := tree.search(node, key)
+	if found {
+		node.Keys[insertPosition] = key
+		return false
+	}
+	// Insert entry's key in the middle of the node
+	node.Keys = append(node.Keys, 0)
+	copy(node.Keys[insertPosition+1:], node.Keys[insertPosition:])
+	node.Keys[insertPosition] = key
+	tree.split(node)
+	return true
+}
 
-	keyToParent := keys[middle]
+func (tree *BTree) insertIntoInternal(node *Node, key int) (inserted bool) {
+	insertPosition, found := tree.search(node, key)
+	if found {
+		node.Keys[insertPosition] = key
+		return false
+	}
+	return tree.insert(node.Children[insertPosition], key)
+}
 
-	// if parent node is not full, insert middle key into it, add new children
-	if !tree.isNodeFull(node.Parent) {
-		tree.insertIntoNotFullParent(node.Parent, keyToParent, left, right)
+func (tree *BTree) split(node *Node) {
+	if !tree.shouldSplit(node) {
 		return
 	}
 
-	tree.insertIntoFullParent(node.Parent, keyToParent, left, right)
+	if node == tree.Root {
+		tree.splitRoot()
+		return
+	}
 
+	tree.splitNonRoot(node)
 }
 
-func (tree *BTree) insertIntoNotFullParent(node *Node, key int, left *Node, right *Node) {
+func (tree *BTree) splitNonRoot(node *Node) {
+	middle := tree.middle()
+	parent := node.Parent
 
-	index := node.insertIntoKeyAndChildAndSort(key)
+	left := &Node{Keys: append([]int(nil), node.Keys[:middle]...), Parent: parent}
+	right := &Node{Keys: append([]int(nil), node.Keys[middle+1:]...), Parent: parent}
 
-	left.setParent(node)
-	right.setParent(node)
+	// Move children from the node to be split into left and right nodes
+	if !tree.isLeaf(node) {
+		left.Children = append([]*Node(nil), node.Children[:middle+1]...)
+		right.Children = append([]*Node(nil), node.Children[middle+1:]...)
+		setParent(left.Children, left)
+		setParent(right.Children, right)
+	}
 
-	// Overwrite
-	node.Children[index] = left
-	node.Children[index+1] = right
+	insertPosition, _ := tree.search(parent, node.Keys[middle])
 
+	// Insert middle key into parent
+	parent.Keys = append(parent.Keys, 0)
+	copy(parent.Keys[insertPosition+1:], parent.Keys[insertPosition:])
+	parent.Keys[insertPosition] = node.Keys[middle]
+
+	// Set child left of inserted key in parent to the created left node
+	parent.Children[insertPosition] = left
+
+	// Set child right of inserted key in parent to the created right node
+	parent.Children = append(parent.Children, nil)
+	copy(parent.Children[insertPosition+2:], parent.Children[insertPosition+1:])
+	parent.Children[insertPosition+1] = right
+
+	tree.split(parent)
+}
+
+func (tree *BTree) splitRoot() {
+	middle := tree.middle()
+
+	left := &Node{Keys: append([]int(nil), tree.Root.Keys[:middle]...)}
+	right := &Node{Keys: append([]int(nil), tree.Root.Keys[middle+1:]...)}
+
+	// Move children from the node to be split into left and right nodes
+	if !tree.isLeaf(tree.Root) {
+		left.Children = append([]*Node(nil), tree.Root.Children[:middle+1]...)
+		right.Children = append([]*Node(nil), tree.Root.Children[middle+1:]...)
+		setParent(left.Children, left)
+		setParent(right.Children, right)
+	}
+
+	// Root is a node with one entry and two children (left and right)
+	newRoot := &Node{
+		Keys:     []int{tree.Root.Keys[middle]},
+		Children: []*Node{left, right},
+	}
+
+	left.Parent = newRoot
+	right.Parent = newRoot
+	tree.Root = newRoot
+}
+
+func setParent(nodes []*Node, parent *Node) {
+	for _, node := range nodes {
+		node.Parent = parent
+	}
 }
 
 // Right :
 func (tree *BTree) Right() {
 	i := tree.Root
 	fmt.Println("************** Right **************")
+	fmt.Println("Root", i)
 
 	for i.numOfChildren() != 0 {
 		i = i.Children[i.numOfChildren()-1]
@@ -241,7 +259,7 @@ func (tree *BTree) Right() {
 func (tree *BTree) Left() {
 	fmt.Println("************** Left **************")
 	i := tree.Root
-	fmt.Println("Node", i)
+	fmt.Println("Root", i)
 	for i.numOfChildren() != 0 {
 		i = i.Children[0]
 		fmt.Println("Node", i)
@@ -257,116 +275,92 @@ func (tree *BTree) Left() {
 	fmt.Println("**************")
 }
 
-func (node *Node) insertIntoKeyAndChildAndSort(key int) int {
-
-	// Initialize index as index of rightmost element
-	// i := node.numOfKeys() - 1
-	index := node.searchChildrenIndexPosition(key)
-
-	// Initialize index as index of rightmost element
-	i := node.numOfKeys() - 1
-	// insert key as last element
-	node.Keys = append(node.Keys, key)
-
-	// The following loop:
-	// a) Moves all greater keys than last inserted to one place ahead
-	for i >= 0 && node.Keys[i] > key {
-		tmp := node.Keys[i+1]
-		node.Keys[i+1] = node.Keys[i]
-		node.Keys[i] = tmp
-		i--
-	}
-
-	// Insert empty node which will be overwritten
-	node.Children = append(node.Children, &Node{})
-
-	// Move all children from rightmost to index position of new key
-	for j := len(node.Keys) - 1; j > index; j-- {
-		tmp := node.Children[j+1]
-		node.Children[j+1] = node.Children[j]
-		node.Children[j] = tmp
-	}
-
-	return index
+// Empty returns true if tree does not contain any nodes
+func (tree *BTree) Empty() bool {
+	return len(tree.Root.Keys) == 0
 }
 
-func (tree *BTree) insertIntoFullParent(node *Node, key int, left *Node, right *Node) {
-	if tree.Root == node {
-		index := node.insertIntoKeyAndChildAndSort(key)
-
-		middle := tree.MinDegree
-
-		keyToParent := node.Keys[middle]
-
-		newRoot := &Node{
-			Keys: []int{keyToParent},
-		}
-
-		// create node left[:middle] and node right [middle+1:]
-		leftRoot := &Node{Keys: append([]int(nil), node.Keys[:middle]...), Parent: newRoot, Children: node.Children[:index]}
-		rightRoot := &Node{Keys: append([]int(nil), node.Keys[middle+1:]...), Parent: newRoot, Children: node.Children[index:]}
-
-		node.Children[index] = left
-		node.Children[index+1] = right
-
-		leftRoot.setParentToChild(*leftRoot)
-		rightRoot.setParentToChild(*rightRoot)
-
-		// Overwrite splitted children
-		newRoot.Children = []*Node{leftRoot, rightRoot}
-
-		tree.Root = newRoot
-	}
+func (tree *BTree) isLeaf(node *Node) bool {
+	return len(node.Children) == 0
 }
 
-// setParentToChild :
-func (node *Node) setParentToChild(parent Node) {
-	fmt.Println("node.Children", node.Children)
-
-	for _, n := range node.Children {
-		n.setParent(&parent)
-	}
+func (tree *BTree) isFull(node *Node) bool {
+	return len(node.Keys) == tree.maxEntries()
 }
 
-func (node *Node) setParent(parent *Node) {
-	node.Parent = parent
+func (tree *BTree) shouldSplit(node *Node) bool {
+	return len(node.Keys) > tree.maxEntries()
 }
 
-func (tree *BTree) splitRootWhenLeaf() {
-	middle := tree.MinDegree
-	// create node left[:middle] and node right [middle+1:]
-	left := &Node{Keys: append([]int(nil), tree.Root.Keys[:middle]...)}
-	right := &Node{Keys: append([]int(nil), tree.Root.Keys[middle+1:]...)}
-
-	// create new node with one key [middle] from previous root and set previous created left and right nodes as his two children
-	newRoot := &Node{
-		Keys: []int{tree.Root.Keys[middle]},
-	}
-
-	left.Parent = newRoot
-	right.Parent = newRoot
-
-	newRoot.Children = []*Node{left, right}
-
-	tree.Root = newRoot
+func (tree *BTree) maxChildren() int {
+	return tree.MaxDegree - 1
 }
 
-func (node *Node) searchChildrenIndexPosition(key int) int {
-	low, high := 0, node.numOfKeys()-1
+func (tree *BTree) minChildren() int {
+	return tree.MaxDegree
+}
 
+func (tree *BTree) maxEntries() int {
+	return tree.maxChildren() - 1
+}
+
+func (tree *BTree) minEntries() int {
+	return tree.minChildren() - 1
+}
+
+func (tree *BTree) middle() int {
+	return tree.MinDegree - 1 // "-1" to favor right nodes to have more keys when splitting
+}
+
+// search searches only within the single node among its entries
+func (tree *BTree) search(node *Node, key int) (index int, found bool) {
+	low, high := 0, len(node.Keys)-1
+	var mid int
 	for low <= high {
-		middle := (high + low) / 2
-
-		if node.Keys[middle] > key {
-			high = middle - 1
-		} else if node.Keys[middle] < key {
-			low = middle + 1
-		} else {
-			return middle
+		mid = (high + low) / 2
+		compare := tree.IntComparator(key, node.Keys[mid])
+		switch {
+		case compare > 0:
+			low = mid + 1
+		case compare < 0:
+			high = mid - 1
+		case compare == 0:
+			return mid, true
 		}
 	}
+	return low, false
+}
 
-	return low
+// searchRecursively searches recursively down the tree starting at the startNode
+func (tree *BTree) searchRecursively(startNode *Node, key int) (node *Node, index int, found bool) {
+	if tree.Empty() {
+		return nil, -1, false
+	}
+	node = startNode
+	for {
+		index, found = tree.search(node, key)
+		if found {
+			return node, index, true
+		}
+		if tree.isLeaf(node) {
+			return nil, -1, false
+		}
+		node = node.Children[index]
+	}
+}
+
+// IntComparator provides a basic comparison on int
+func (tree *BTree) IntComparator(a int, b int) int {
+	aAsserted := a
+	bAsserted := b
+	switch {
+	case aAsserted > bAsserted:
+		return 1
+	case aAsserted < bAsserted:
+		return -1
+	default:
+		return 0
+	}
 }
 
 /**
