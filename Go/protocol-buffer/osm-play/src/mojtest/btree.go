@@ -139,11 +139,13 @@ func (tree *BTree) searchChild(node *Node, key int) {
 	// repeat this step for every nested child until last node is leaf
 	if !node.Children[childIndex].isLeaf() {
 		tree.searchChild(node.Children[childIndex], key)
+		return
 	}
 
 	// insert key into leaf
 	// if node is not full insert key into node and sort node
 	if !tree.isNodeFull(node.Children[childIndex]) {
+
 		tree.insertIntoNotFullLeaf(node.Children[childIndex], key)
 		return
 	}
