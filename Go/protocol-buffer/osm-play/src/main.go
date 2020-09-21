@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"time"
 
-	"example.com/src/mojtest"
+	"example.com/src/osmpbfsearchfile"
 	"example.com/src/pg1"
 )
 
@@ -16,14 +16,15 @@ func main() {
 	PrintMemUsage()
 	pg1.Testing()
 	// pbf_darko.Node{}
-	f, err := os.Open("croatia-places.pbf")
+	f, err := os.Open("export.osm")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 	start := time.Now()
 
-	// osmpbfsearchfile.ListNodes(f)
+	osmpbfsearchfile.ListNodes(f)
+	print("kjashdklj")
 	// err = mojtest.WriteIndexes(f)
 	// err = mojtest.FindPlace("Žužići")
 	// err = mojtest.List()
@@ -37,26 +38,26 @@ func main() {
 	// b[len(b)] = 5
 
 	// mojtest.SortNodes(f)
-	btree := mojtest.InitBtree(2)
-	btree.Put(2)
-	btree.Put(7)
-	btree.Put(3)
-	btree.Put(5)
-	btree.Put(4)
-	btree.Put(6)
-	btree.Put(22)
-	btree.Put(23)
+	// btree := mojtest.InitBtree(2)
+	// btree.Put(2)
+	// btree.Put(7)
+	// btree.Put(3)
+	// btree.Put(5)
+	// btree.Put(4)
+	// btree.Put(6)
+	// btree.Put(22)
+	// btree.Put(23)
+	// // btree.Put(1)
+	// btree.Put(28)
+	// btree.Put(35)
 	// btree.Put(1)
-	btree.Put(28)
-	btree.Put(35)
-	btree.Put(1)
-	btree.Put(30)
-	btree.Put(9)
-	btree.Put(12)
-	btree.Put(1)
-	btree.Right()
-	btree.Left()
-	fmt.Println(btree.Get(1))
+	// btree.Put(30)
+	// btree.Put(9)
+	// btree.Put(12)
+	// btree.Put(1)
+	// btree.Right()
+	// btree.Left()
+	// fmt.Println(btree.Get(1))
 	// // s := []int{1, 2, 3}
 	// // s2 := []int{4, 5, 6}
 
