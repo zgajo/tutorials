@@ -2,9 +2,10 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_apigateway as apigw,
     core,
-)ModuleNotFoundError: No module named 'hitcounter'
+)
 from cdk_dynamo_table_viewer import TableViewer
 from hitcounter import HitCounter
+
 
 class CdkworkshopStack(core.Stack):
 
@@ -33,4 +34,4 @@ class CdkworkshopStack(core.Stack):
             self, 'ViewHitCounter',
             title='Hello Hits',
             table=hello_with_counter.table,
-        ) 
+        )
